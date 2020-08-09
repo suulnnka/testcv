@@ -9,6 +9,10 @@ opencv-phthon
 https://github.com/shawnsky/extract-subtitles.git
 https://github.com/drsanwujiang/video-timeline-and-subtitle-extract
 
+https://github.com/apm1467/videocr
+https://github.com/broija/subdetection
+https://github.com/xhlove/SubTimeLine
+
 视频下载
 https://github.com/iawia002/annie
 
