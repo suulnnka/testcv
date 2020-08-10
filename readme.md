@@ -1,6 +1,7 @@
 CnStd
 CnOcr
 opencv-phthon
+numba
 
 下载视频
 ./annie -f 16 -p https://www.bilibili.com/video/BV1iV411z7Ub

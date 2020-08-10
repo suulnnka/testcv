@@ -5,13 +5,10 @@ from cnstd import CnStd
 
 std = CnStd()
 
-CV_CAP_PROP_POS_FRAMES = 1
-CV_CAP_PROP_FRAME_COUNT = 7
-
 def get_key_frame(video_path):
     cap = cv2.VideoCapture(video_path)
 
-    frames_number = cap.get(CV_CAP_PROP_FRAME_COUNT)
+    frames_number = cap.get(cv2.CAP_PROP_FRAME_COUNT)
 
     frames = []
     
@@ -21,7 +18,7 @@ def get_key_frame(video_path):
 
         frame = math.floor(frames_number * pos)
 
-        cap.set(CV_CAP_PROP_POS_FRAMES,frame)
+        cap.set(cv2.CAP_PROP_POS_FRAMES,frame)
 
         _,frame = cap.read()
 
@@ -155,14 +152,16 @@ frames = get_key_frame(video_path)
 
 print("get key frame done.")
 
-#y_list = get_key_frame_box(frames)
-y_list = [[310, 335], [310, 335], [310, 335], [306, 335], [310, 335], [0, 102], [288, 365], [310, 335], [302, 335], [310, 335]]
+y_list = get_key_frame_box(frames)
+#y_list = [[310, 335], [310, 335], [310, 335], [306, 335], [310, 335], [0, 102], [288, 365], [310, 335], [302, 335], [310, 335]]
 
 print("get key frame box done.")
 
 subtitle_y = get_subtitle_y(y_list)
 
 print("get subtitle y done.")
+
+print(subtitle_y)
 
 subtitle = get_subtitle(video_path,subtitle_y)
 
