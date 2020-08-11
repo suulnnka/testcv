@@ -14,6 +14,8 @@ https://github.com/apm1467/videocr
 https://github.com/broija/subdetection
 https://github.com/xhlove/SubTimeLine
 
+https://xinancsd.github.io/Python/subtitle.html
+
 视频下载
 https://github.com/iawia002/annie
 
@@ -25,3 +27,4 @@ https://github.com/breezedeus/cnstd
 https://github.com/breezedeus/cnocr
 https://github.com/PaddlePaddle/PaddleOCR
 
+https://github.com/lars76/chinese-subtitle-ocr

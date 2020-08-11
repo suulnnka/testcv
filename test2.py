@@ -45,7 +45,7 @@ def __similar_to_previous(_previous, _current):
 
 @jit(nopython=True)
 def expand(binary,gray):
-    blood_fill_map = binary.copy()
+    flood_fill_map = binary.copy()
     
     stack = []
 
@@ -63,34 +63,70 @@ def expand(binary,gray):
         y = point[1]
         point_value = gray[x][y]
         if x > 0:
-            if blood_fill_map[x-1][y] == 255:
-                blood_fill_map[x-1][y] = 0
+            if flood_fill_map[x-1][y] == 255:
+                flood_fill_map[x-1][y] = 0
                 new_point_value = gray[x - 1][y]
                 if new_point_value > expand_threshold:
                     binary[x-1][y] = 255 - new_point_value
                     stack.append([x-1,y])
         if x < height:
-            if blood_fill_map[x+1][y] == 255:
-                blood_fill_map[x+1][y] = 0
+            if flood_fill_map[x+1][y] == 255:
+                flood_fill_map[x+1][y] = 0
                 new_point_value = gray[x+1][y]
                 if new_point_value > expand_threshold:
                     binary[x+1][y] = 255 - new_point_value
                     stack.append([x+1,y])
         if y > 0:
-            if blood_fill_map[x][y-1] == 255:
-                blood_fill_map[x][y-1] = 0
+            if flood_fill_map[x][y-1] == 255:
+                flood_fill_map[x][y-1] = 0
                 new_point_value = gray[x][y-1]
                 if new_point_value > expand_threshold:
                     binary[x][y-1] = 255 - new_point_value
                     stack.append([x,y-1])
         if y < width:
-            if blood_fill_map[x][y+1] == 255:
-                blood_fill_map[x][y+1] = 0
+            if flood_fill_map[x][y+1] == 255:
+                flood_fill_map[x][y+1] = 0
                 new_point_value = gray[x][y+1]
                 if new_point_value > expand_threshold:
                     binary[x][y+1] = 255 - new_point_value
                     stack.append([x,y+1])
     return binary
+
+
+kernel = cv2.getStructuringElement(cv2.MORPH_RECT,(5,5))
+
+@jit(nopython=True)
+def dilate_flood_fill(frame,dilation):
+    height, width = frame.shape
+
+    stack = []
+
+    for i in range(height):
+        for j in range(width):
+            if dilation[i][j] < 128:
+                frame[i][j] = 255
+                stack.append([i,j])
+
+    while len(stack) > 0 :
+        point = stack.pop()
+        x = point[0]
+        y = point[1]
+
+        if x > 0 and frame[x-1][y] < 128 :
+            frame[x-1][y] = 255
+            stack.append([x-1,y])
+        if y > 0 and frame[x][y-1] < 128 :
+            frame[x][y-1] = 255
+            stack.append([x,y-1])
+        if x < height - 1 and frame[x+1][y] < 128 :
+            frame[x+1][y] = 255
+            stack.append([x+1,y])
+        if y < width - 1 and frame[x][y+1] < 128 :
+            frame[x][y+1] = 255
+            stack.append([x,y+1])
+    
+    return frame
+
 
 def threshold(gray):
     _, binary = cv2.threshold(gray, binary_threshold, 255, cv2.THRESH_BINARY_INV)  # 反转二值化
@@ -99,9 +135,16 @@ def threshold(gray):
 
     #return binary
 
-    binary = expand(binary,gray)
+    binary = expand(binary,gray) # 次像素也包含进来
+
+    #return binary
+
+    dilation = cv2.dilate(binary, kernel) # 腐蚀掉文字，留下大片的空白背景
+
+    binary = dilate_flood_fill(binary,dilation) # 去除掉白色背景
 
     return binary
+
 
 def toGray(src):
     img = []
@@ -154,7 +197,7 @@ def __preliminary_analyse(video_path,y,x):
         if current_analyse > 1 and __calculate_white(previous_binary) < 0.99:
             # 如果综合判断为是不同帧
             #if similarity[1] > 10 * similarity[0] and similarity[1] > 10 * similarity[2]:
-            if similarity[1] / area > 0.01 and similarity[2] / area < 0.01:
+            if similarity[1] / area > 0.03 and similarity[2] / area < 0.03:
                 # 如果不是第一次添加时间轴
                 if current_subtitle[0] != -1:
                     a = a + 1

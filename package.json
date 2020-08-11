@@ -1,0 +1,22 @@
+{
+  "name": "img",
+  "version": "1.0.0",
+  "description": "CnStd CnOcr opencv-phthon numba",
+  "main": "download_video.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/suulnnka/testcv.git"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/suulnnka/testcv/issues"
+  },
+  "homepage": "https://github.com/suulnnka/testcv#readme",
+  "dependencies": {
+    "better-sqlite3": "^7.1.0"
+  }
+}
