@@ -7,11 +7,14 @@ import numpy as np
 #from cnstd import CnStd
 from cnocr import CnOcr
 
+#import paddlehub as hub
+#ocr_baidu = hub.Module(name="chinese_ocr_db_crnn_server")
+
 import numba
 from numba import jit
 
 #std = CnStd()
-ocr = CnOcr()# model_name='densenet-lite-gru' )
+ocr = CnOcr() # model_name='densenet-lite-gru' )
 
 binary_threshold = 246
 expand_threshold = 220
@@ -207,7 +210,8 @@ def __preliminary_analyse(video_path,y,x):
                     #    return subtitle_list
 
                 current_subtitle[0] = current_analyse - 1  # 将当前时间轴起点设为前一帧
-                current_subtitle[2] = previous_binary # previous_cropped  # 前一帧
+                current_subtitle[2] = previous_binary #previous_cropped  # 前一帧
+                #current_subtitle[2] = previous_cropped  # 百度专用
             else:
                 current_subtitle[1] = current_analyse - 1  # 将当前时间轴终点设为前一帧
 
@@ -250,10 +254,15 @@ fps = float(_cv.get(cv2.CAP_PROP_FPS))
 _cv.release()
 
 for subtitle in subtitle_list:
+
     #content = pytesseract.image_to_string(subtitle[2], lang='chi_sim')
+
     content = ocr.ocr_for_single_line(subtitle[2])
     content = ''.join(content)
     subtitle[3] = content
+
+    #content = ocr_baidu.recognize_text(images=[subtitle[2]])
+    #subtitle[3] = content[0]["data"][0]["text"]
 
 output = open("test.srt", mode="w", encoding="utf-8")
 for i in range(len(subtitle_list) - 1):
