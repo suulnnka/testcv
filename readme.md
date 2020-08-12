@@ -26,5 +26,12 @@ https://github.com/ouyanghuiyu/chineseocr_lite
 https://github.com/breezedeus/cnstd
 https://github.com/breezedeus/cnocr
 https://github.com/PaddlePaddle/PaddleOCR
+https://github.com/JaidedAI/EasyOCR
+https://github.com/xiaofengShi/CHINESE-OCR
+https://github.com/YCG09/chinese_ocr
 
 https://github.com/lars76/chinese-subtitle-ocr
+
+图像处理
+https://github.com/bojone/simple-chinese-ocr
+
