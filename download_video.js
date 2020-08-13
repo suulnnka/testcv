@@ -7,11 +7,61 @@ console.log(db.pragma('cache_size', { simple: true })); // => 32000
 
 const stmt = db.prepare('INSERT INTO people VALUES ($firstName, $lastName, $age)');
 
-// user : uid, website_id, name, have_subtitle, website
-// user box: ubid,uid,start_time,end_time,up,down,left,right,font_color,font_size,font_name,font_bg_color
-// video : uid, is_download( no,yes,doing ), have_subtitle, download_time, video_time
-//         size, length, is_ocr(no,yes,doing), need_download, need_check_download, type,
-//         ubid, need_ocr, need_check_ocr
+/*
+create table user_box
+(
+    ubid INTEGER not null
+        constraint user_box_pk
+        primary key autoincrement,
+    uid integer not null,
+    start_time datetime,
+    end_time datetime,
+    font_name varchar(20),
+    font_color varchar(20),
+    font_bg_color varchar(20),
+    font_size int,
+    subtitle_up int,
+    subtitle_down int,
+    subtitle_left int,
+    subtitle_right int
+)
+create table user
+(
+    uid INTEGER default 0 not null
+	    constraint user_pk
+	    primary key autoincrement,
+	wid varchar(50) not null,
+	website varchar(50) not null,
+	name varchar(50),
+	have_subtitle boolean default false not null,
+    last_check_time datetime
+)
 
-// user_info : user_follower...
-// video_info : watch_times...
+create table video
+(
+    vid INTEGER not null
+        constraint video_pk
+        primary key autoincrement,
+    uid integer not null,
+    ubid integer not null,
+    wvid varchar(30),
+    video_name varchar(50),
+    part int,
+    website varchar(20),
+    download_time datetime,
+    video_time datetime,
+
+    size int,
+    length int,
+    type varchar(20),
+
+    have_subtitle boolean,
+    is_ocr varchar(10), -- yes no doing
+    is_download varchar(10), -- yes no doing
+
+    need_download boolean,
+    need_check_download boolean,
+    need_check_ocr boolean,
+    need_ocr boolean
+)
+*/
