@@ -96,6 +96,59 @@ async function create_video(){
     }
 }
 
-const user_select  = db.prepare('SELECT * FROM user WHERE website=? and uid=?')
-let user = user_select.get('bilibili',6)
-console.log(user)
+// const user_select  = db.prepare('SELECT * FROM user WHERE website=? and uid=?')
+// let user = user_select.get('bilibili',6)
+// console.log(user)
+
+//let video_select = db.prepare("SELECT wvid,need_download FROM video WHERE need_download = true")
+
+//let video = video_select.all();
+//console.log(video)
+
+function set_need_download(){
+    // 1. user的have_subtitle == true
+    // 2. 长度不超过30分钟 (?)
+    // 3. video的have_subtitle != false
+
+}
+
+async function get_bilibili_video_info(bv){
+    // get info from api
+
+    // update video info
+
+    // if part > 1
+    //   insert new video into video table
+
+    // console.log(bv)
+}
+
+async function get_videos_info(){
+    let video_select = db.prepare("SELECT wvid FROM video WHERE video_name is null")
+    let video = video_select.all();
+    for(let i in video){
+        wvid = video[i].wvid
+        get_bilibili_video_info(wvid)
+    }
+}
+
+async function download_bilibili_video(bv){
+    // get part number from database
+    // download every part
+    // ./annie -f 16 -p https://www.bilibili.com/video/BV1iV411z7Ub
+    // rename video
+    // mv video into new folder
+    // update database
+}
+
+async function download_videos(){
+    let video_select = db.prepare("SELECT wvid FROM video WHERE need_download = true AND part = 1")
+    let video = video_select.all();
+    for(let i in video){
+        wvid = video[i].wvid
+        download_bilibili_video(wvid)
+    }
+}
+
+get_videos_info()
+
