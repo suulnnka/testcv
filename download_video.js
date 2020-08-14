@@ -79,8 +79,6 @@ async function create_user(){
     }
 }
 
-// create_user()
-
 async function create_video(){
     let user_list = require('./videoList.json')
 
@@ -98,6 +96,6 @@ async function create_video(){
     }
 }
 
-// create_video()
-
-
+const user_select  = db.prepare('SELECT * FROM user WHERE website=? and uid=?')
+let user = user_select.get('bilibili',6)
+console.log(user)
