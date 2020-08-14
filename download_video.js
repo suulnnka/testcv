@@ -5,7 +5,7 @@ db.pragma('cache_size = 32000');
 
 console.log(db.pragma('cache_size', { simple: true })); // => 32000
 
-const stmt = db.prepare('INSERT INTO people VALUES ($firstName, $lastName, $age)');
+// const stmt = db.prepare('INSERT INTO people VALUES ($firstName, $lastName, $age)');
 
 /*
 create table user_box
@@ -34,7 +34,8 @@ create table user
 	website varchar(50) not null,
 	name varchar(50),
 	have_subtitle boolean default false not null,
-    last_check_time datetime
+    last_check_time datetime,
+    main_type varchar(50)
 )
 
 create table video
@@ -43,8 +44,8 @@ create table video
         constraint video_pk
         primary key autoincrement,
     uid integer not null,
-    ubid integer not null,
-    wvid varchar(30),
+    ubid integer,
+    wvid varchar(30) not null,
     video_name varchar(50),
     part int,
     website varchar(20),
@@ -65,3 +66,36 @@ create table video
     need_ocr boolean
 )
 */
+
+async function create_user(){
+    let user_list = require('./videoList.json')
+
+    const stmt = db.prepare('INSERT INTO user (wid, name, website, main_type) VALUES (?, ?, ?, ?)');
+
+    for(i of user_list){
+        const info = stmt.run(i.uid.toString(),i.name,'bilibili',i.area);
+
+        console.log(info)
+    }
+}
+
+// create_user()
+
+async function create_video(){
+    let user_list = require('./videoList.json')
+
+    const video_create = db.prepare('INSERT INTO video (uid, wvid, part, website) VALUES (?, ?, ?, ?)');
+    const user_select  = db.prepare('SELECT * FROM user WHERE website=? and wid=?')
+
+    for(i of user_list){
+        let user = user_select.get('bilibili',i.uid.toString())
+
+        for( j in i.videos ){
+            video_id = i.videos[j]
+            // console.log(video_id)
+            // const info = video_create.run(i.uid.toString(),i.name,'bilibili',i.area);
+        }
+    }
+}
+
+create_video()
