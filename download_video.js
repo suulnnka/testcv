@@ -93,9 +93,11 @@ async function create_video(){
         for( j in i.videos ){
             video_id = i.videos[j]
             // console.log(video_id)
-            // const info = video_create.run(i.uid.toString(),i.name,'bilibili',i.area);
+            const info = video_create.run(user.uid,video_id,1,'bilibili');
         }
     }
 }
 
-create_video()
+// create_video()
+
+
