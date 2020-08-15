@@ -152,3 +152,11 @@ async function download_videos(){
 
 get_videos_info()
 
+// if user have subtitle
+// if video length < 30 min
+//     need_download = true
+// else
+//     need_check_download = true
+
+// if have need download video
+// download it
