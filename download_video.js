@@ -1,7 +1,10 @@
 const Database = require('better-sqlite3');
+const axios = require('axios')
 const db = new Database('video.db');
 
 db.pragma('cache_size = 32000');
+
+const sleep = (time = 1000) => new Promise((res, rej) => setTimeout(res, time));
 
 // console.log(db.pragma('cache_size', { simple: true })); // => 32000
 
@@ -169,6 +172,37 @@ async function get_user_video(){
 
 }
 
+async function get_bilibili_video_part_info(av,cid,part){
+    let url = 'https://api.bilibili.com/x/web-interface/view?aid=' + av + '&cid=' + cid
+    let json = await axios.get(url)
+    await sleep(2000)
+
+    let data = json.data.data
+
+    let mid = data.owner.mid
+
+    let user_select = db.prepare('SELECT uid FROM user WHERE wid=?');
+    let uid = user_select.get(String(mid)).uid
+
+    let wvid = data.bvid
+    let video_name = data.title+'-'+data.pages[part-1].part
+    let video_time = data.ctime
+    let length = data.duration
+    let type = data.tname
+
+    let subtitle = data.subtitle
+    let subtitle_json = null
+
+    for( let i in subtitle.list ){
+        if( subtitle.list[i].lan == 'zh-CN' ){
+            subtitle_json = subtitle.list[i].subtitle_url
+        }
+    }
+
+    let video_insert = db.prepare("INSERT INTO video (uid,wvid,part,website,video_name,video_time,length,type,subtitle_json) VALUES (?,?,?,?,?,?,?,?,?)")
+    video_insert.run(uid,wvid,part,'bilibili',video_name,video_time,length,type,subtitle_json)
+}
+
 async function get_bilibili_video_info(bv){
     // get info from api
 
@@ -177,12 +211,48 @@ async function get_bilibili_video_info(bv){
     // if part > 1
     //   insert new video into video table
 
-    console.log(bv)
+    // console.log(bv)
 
     let url = 'https://api.bilibili.com/x/web-interface/view?bvid=' + bv
+    // url = 'https://api.bilibili.com/x/web-interface/view?bvid=BV1Yt411R7Nk'
 
-    
+    let json = await axios.get(url)
+    await sleep(2000)
 
+    let data = json.data.data
+
+    let subtitle = data.subtitle
+
+    let subtitle_json = null
+
+    let aid = data.aid
+
+    for( let i in subtitle.list ){
+        if( subtitle.list[i].lan == 'zh-CN' ){
+            subtitle_json = subtitle.list[i].subtitle_url
+        }
+    }
+
+    for( let i = 1 ; i < data.pages.length ; i ++ ){
+        let page = data.pages[i]
+        let cid = page.cid
+        let part = page.page
+        await get_bilibili_video_part_info(aid,cid,part)
+    }
+
+    let video_name = data.title
+    if ( data.videos > 1){
+        video_name = video_name+'-'+data.pages[0].part
+    }
+
+    let video_time = data.ctime
+    let length = data.duration
+    let type = data.tname
+
+    let video_update = db.prepare("UPDATE video SET video_name=?,video_time=?,length=?,type=?,subtitle_json=?  WHERE wvid = ? ")
+    video_update.run(video_name,video_time,length,type,subtitle_json,bv)
+
+    // console.log(JSON.stringify(data,null,2))
 }
 
 async function get_videos_info(){
@@ -204,7 +274,7 @@ async function get_videos_info(){
             let wvid = video_list[i].wvid
 
             if(!video_name){
-                get_bilibili_video_info(wvid)
+                await get_bilibili_video_info(wvid)
             }
 
         }

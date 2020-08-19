@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/suulnnka/testcv#readme",
   "dependencies": {
+    "axios": "^0.19.2",
     "better-sqlite3": "^7.1.0"
   }
 }
