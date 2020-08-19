@@ -1,9 +1,9 @@
 const Database = require('better-sqlite3');
-const db = new Database('video.db', { verbose: console.log });
+const db = new Database('video.db');
 
 db.pragma('cache_size = 32000');
 
-console.log(db.pragma('cache_size', { simple: true })); // => 32000
+// console.log(db.pragma('cache_size', { simple: true })); // => 32000
 
 // const stmt = db.prepare('INSERT INTO people VALUES ($firstName, $lastName, $age)');
 
@@ -112,17 +112,6 @@ function set_need_download(){
 
 }
 
-async function get_bilibili_video_info(bv){
-    // get info from api
-
-    // update video info
-
-    // if part > 1
-    //   insert new video into video table
-
-    // console.log(bv)
-}
-
 async function get_videos_info(){
     let video_select = db.prepare("SELECT wvid FROM video WHERE video_name is null")
     let video = video_select.all();
@@ -150,7 +139,7 @@ async function download_videos(){
     }
 }
 
-get_videos_info()
+// get_videos_info()
 
 // if user have subtitle
 // if video length < 30 min
@@ -160,3 +149,67 @@ get_videos_info()
 
 // if have need download video
 // download it
+
+async function get_user_video(){
+    let user_select = db.prepare("SELECT uid FROM user")
+    let user_list = user_select.all();
+    
+    // console.log(user)
+
+    let video_select = db.prepare("SELECT wvid FROM video WHERE uid = ? LIMIT 10")
+
+    for( let i in user_list ){
+        let uid = user_list[i].uid
+        
+        let video_list = video_select.all(uid)
+
+        console.log(video_list)
+
+    }
+
+}
+
+async function get_bilibili_video_info(bv){
+    // get info from api
+
+    // update video info
+
+    // if part > 1
+    //   insert new video into video table
+
+    console.log(bv)
+
+    let url = 'https://api.bilibili.com/x/web-interface/view?bvid=' + bv
+
+    
+
+}
+
+async function get_videos_info(){
+
+    let select = db.prepare("SELECT max(vid) as max FROM video")
+    let total = select.get().max
+
+    let pos = 0
+
+    while( pos < total ){
+        let video_select = db.prepare("SELECT vid,wvid,video_name FROM video WHERE vid > ? LIMIT 1")
+        let video_list = video_select.all(pos)
+
+        for(let i in video_list){
+            let vid = video_list[i].vid
+            pos = Math.max(vid,pos)
+        
+            let video_name = video_list[i].video_name
+            let wvid = video_list[i].wvid
+
+            if(!video_name){
+                get_bilibili_video_info(wvid)
+            }
+
+        }
+    
+    }
+}
+
+get_videos_info()
