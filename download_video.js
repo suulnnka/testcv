@@ -172,17 +172,17 @@ async function get_user_video(){
 
 }
 
-async function get_bilibili_video_part_info(av,cid,part){
+async function get_bilibili_video_part_info(av,cid,part,uid){
     let url = 'https://api.bilibili.com/x/web-interface/view?aid=' + av + '&cid=' + cid
     let json = await axios.get(url)
-    await sleep(2000)
+    await sleep(5000)
 
     let data = json.data.data
 
-    let mid = data.owner.mid
+    // let mid = data.owner.mid
 
-    let user_select = db.prepare('SELECT uid FROM user WHERE wid=?');
-    let uid = user_select.get(String(mid)).uid
+    // let user_select = db.prepare('SELECT uid FROM user WHERE wid=?');
+    // let uid = user_select.get(String(mid)).uid
 
     let wvid = data.bvid
     let video_name = data.title+'-'+data.pages[part-1].part
@@ -216,8 +216,10 @@ async function get_bilibili_video_info(bv){
     let url = 'https://api.bilibili.com/x/web-interface/view?bvid=' + bv
     // url = 'https://api.bilibili.com/x/web-interface/view?bvid=BV1Yt411R7Nk'
 
+    console.log(bv)
+
     let json = await axios.get(url)
-    await sleep(2000)
+    await sleep(5000)
 
     let data = json.data.data
 
@@ -237,7 +239,11 @@ async function get_bilibili_video_info(bv){
         let page = data.pages[i]
         let cid = page.cid
         let part = page.page
-        await get_bilibili_video_part_info(aid,cid,part)
+
+        let user_select = db.prepare('SELECT uid FROM video WHERE wvid=? AND website=?');
+        let uid = user_select.get(bv, 'bilibili').uid
+
+        await get_bilibili_video_part_info(aid,cid,part,uid)
     }
 
     let video_name = data.title
@@ -263,7 +269,7 @@ async function get_videos_info(){
     let pos = 0
 
     while( pos < total ){
-        let video_select = db.prepare("SELECT vid,wvid,video_name FROM video WHERE vid > ? LIMIT 1")
+        let video_select = db.prepare("SELECT vid,wvid,video_name FROM video WHERE vid > ? LIMIT 100")
         let video_list = video_select.all(pos)
 
         for(let i in video_list){
@@ -274,7 +280,12 @@ async function get_videos_info(){
             let wvid = video_list[i].wvid
 
             if(!video_name){
-                await get_bilibili_video_info(wvid)
+                try{
+                    await get_bilibili_video_info(wvid)
+                }catch(err){
+                    console.error(wvid,'error')
+                    console.error(err)
+                }
             }
 
         }
