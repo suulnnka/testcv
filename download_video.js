@@ -4,6 +4,8 @@ const db = new Database('video.db');
 
 axios.defaults.timeout = 2000
 
+let interval = 5000
+
 db.pragma('cache_size = 32000');
 
 last_time = 0
@@ -11,7 +13,7 @@ const sleep = function (){
     return new Promise(function(res,rej){
         let now = new Date().getTime();
         let diff = now - last_time
-        let need_sleep_time = Math.max(250 - diff,0)
+        let need_sleep_time = Math.max(interval - diff,0)
         setTimeout(async function(){
             last_time = new Date().getTime()
             res()
@@ -207,7 +209,7 @@ async function get_user_video(){
 async function get_bilibili_video_part_info(av,cid,part,uid){
     let url = 'https://api.bilibili.com/x/web-interface/view?aid=' + av + '&cid=' + cid
     await sleep()
-    let json = await axios.get(url,{proxy})
+    let json = await axios.get(url,{proxy1:proxy})
 
     let data = json.data.data
 
@@ -251,7 +253,7 @@ async function get_bilibili_video_info(bv){
     console.log(bv)
 
     await sleep()
-    let json = await axios.get(url,{proxy})
+    let json = await axios.get(url,{proxy1:proxy})
 
     let data = json.data.data
 
@@ -324,7 +326,9 @@ async function get_videos_info(){
                     await get_bilibili_video_info(wvid)
                 }catch(err){
                     console.error(wvid,'error')
-                    // console.error(err)
+                    console.error(err)
+                    let video_delete = db.prepare('delete from video where wvid = ? and part != 1')
+                    video_delete.run(wvid)
                 }
             }
 
@@ -337,8 +341,8 @@ async function get_videos_info(){
 
 async function delete_duplicate_data(){
 
-    let wvids_select = db.prepare('select wvid from (select min(vid) as vid,wvid,count(1) as c from video where part = 2 group by wvid) where c > 1')
-    let wvids = wvids_select.all()
+    let wvids_select = db.prepare('select wvid from (select min(vid) as vid,wvid,count(1) as c from video where part = ? group by wvid) where c > 1')
+    let wvids = wvids_select.all(2)
 
 
     let video_delete = db.prepare('delete from video where wvid = ? and vid not in (select min(vid) as vid from video where wvid = ? group by part)')
@@ -346,8 +350,26 @@ async function delete_duplicate_data(){
     for(let i of wvids){
         let wvid = i.wvid
         console.log(wvid)
-        video_delete()
+        let res = video_delete.run(wvid,wvid)
+        console.log(res)
     }
+
+    /*
+    let wvids_select_2 = db.prepare('select uid,wvid from (select min(uid) as uid,wvid,count(*) as c from video where part = 1 group by wvid) where c > 1')
+    let videos = wvids_select_2.all()
+
+    let video_delete = db.prepare('delete from video where wvid = ? and uid != ?')
+
+    console.log(videos)
+
+    for(let i of wvids){
+        let wvid = i.wvid
+        let uid = i.uid
+        console.log(wvid,'uid:',uid)
+        let res = video_delete_2.run(wvid,uid)
+        console.log(res)
+    }
+    */
 
 }
 
