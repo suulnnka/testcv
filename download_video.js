@@ -324,7 +324,7 @@ async function get_videos_info(){
                     await get_bilibili_video_info(wvid)
                 }catch(err){
                     console.error(wvid,'error')
-                    console.error(err)
+                    // console.error(err)
                 }
             }
 
@@ -333,4 +333,22 @@ async function get_videos_info(){
     }
 }
 
-get_videos_info()
+// get_videos_info()
+
+async function delete_duplicate_data(){
+
+    let wvids_select = db.prepare('select wvid from (select min(vid) as vid,wvid,count(1) as c from video where part = 2 group by wvid) where c > 1')
+    let wvids = wvids_select.all()
+
+
+    let video_delete = db.prepare('delete from video where wvid = ? and vid not in (select min(vid) as vid from video where wvid = ? group by part)')
+    
+    for(let i of wvids){
+        let wvid = i.wvid
+        console.log(wvid)
+        video_delete()
+    }
+
+}
+
+delete_duplicate_data()
