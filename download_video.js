@@ -354,23 +354,19 @@ async function delete_duplicate_data(){
         console.log(res)
     }
 
-    /*
     let wvids_select_2 = db.prepare('select uid,wvid from (select min(uid) as uid,wvid,count(*) as c from video where part = 1 group by wvid) where c > 1')
     let videos = wvids_select_2.all()
 
-    let video_delete = db.prepare('delete from video where wvid = ? and uid != ?')
+    let video_delete_2 = db.prepare('delete from video where wvid = ? and uid != ?')
 
-    console.log(videos)
-
-    for(let i of wvids){
+    for(let i of videos){
         let wvid = i.wvid
         let uid = i.uid
         console.log(wvid,'uid:',uid)
         let res = video_delete_2.run(wvid,uid)
         console.log(res)
     }
-    */
 
 }
 
-delete_duplicate_data()
+// delete_duplicate_data()
