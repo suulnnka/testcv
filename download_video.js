@@ -2,30 +2,24 @@ const Database = require('better-sqlite3');
 const axios = require('axios')
 const db = new Database('video.db');
 
+axios.defaults.timeout = 2000
+
 db.pragma('cache_size = 32000');
 
-let change_ip_url = 'https://tps.kdlapi.com/api/changetpsip?orderid=909823772898578&signature=iyhbimxq4zthtbvqwcgjv5emps05lvd6'
-
-last_change_ip_time = 0
 last_time = 0
 const sleep = function (){
     return new Promise(function(res,rej){
         let now = new Date().getTime();
         let diff = now - last_time
-        let need_sleep_time = Math.max(500 - diff,0)
+        let need_sleep_time = Math.max(250 - diff,0)
         setTimeout(async function(){
             last_time = new Date().getTime()
-            if(now - last_change_ip_time > 1000 * 2){
-                last_change_ip_time = now
-                //let status = await axios.get(change_ip_url)
-                //console.log(status.data)
-                //let new_ip = status.data.data.new_ip
-                //console.log('change ip done,ip:'+new_ip)
-            }
             res()
         },need_sleep_time)
     })
 }
+
+const wait = (time) => new Promise((res)=>setTimeout(res, time))
 
 // 代理服务器
 const proxyHost = "tps185.kdlapi.com";
