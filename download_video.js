@@ -4,7 +4,45 @@ const db = new Database('video.db');
 
 db.pragma('cache_size = 32000');
 
-const sleep = (time = 1000) => new Promise((res, rej) => setTimeout(res, time));
+let change_ip_url = 'https://tps.kdlapi.com/api/changetpsip?orderid=909823772898578&signature=iyhbimxq4zthtbvqwcgjv5emps05lvd6'
+
+last_change_ip_time = 0
+last_time = 0
+const sleep = function (){
+    return new Promise(function(res,rej){
+        let now = new Date().getTime();
+        let diff = now - last_time
+        let need_sleep_time = Math.max(500 - diff,0)
+        setTimeout(async function(){
+            last_time = new Date().getTime()
+            if(now - last_change_ip_time > 1000 * 2){
+                last_change_ip_time = now
+                //let status = await axios.get(change_ip_url)
+                //console.log(status.data)
+                //let new_ip = status.data.data.new_ip
+                //console.log('change ip done,ip:'+new_ip)
+            }
+            res()
+        },need_sleep_time)
+    })
+}
+
+// 代理服务器
+const proxyHost = "tps185.kdlapi.com";
+const proxyPort = 15818;
+
+// 代理隧道验证信息
+const proxyUser = "t19823772898528";
+const proxyPass = "hn5zk0yg";
+
+let proxy = {
+    host: proxyHost,
+    port: proxyPort,
+    auth: {
+        username: proxyUser,
+        password: proxyPass
+    },
+}
 
 // console.log(db.pragma('cache_size', { simple: true })); // => 32000
 
@@ -174,8 +212,8 @@ async function get_user_video(){
 
 async function get_bilibili_video_part_info(av,cid,part,uid){
     let url = 'https://api.bilibili.com/x/web-interface/view?aid=' + av + '&cid=' + cid
-    let json = await axios.get(url)
-    await sleep(5000)
+    await sleep()
+    let json = await axios.get(url,{proxy})
 
     let data = json.data.data
 
@@ -218,12 +256,20 @@ async function get_bilibili_video_info(bv){
 
     console.log(bv)
 
-    let json = await axios.get(url)
-    await sleep(5000)
+    await sleep()
+    let json = await axios.get(url,{proxy})
 
     let data = json.data.data
 
-    let subtitle = data.subtitle
+    let subtitle
+    try{
+        subtitle = data.subtitle
+    }catch(err){
+        let video_delete = db.prepare('DELETE FROM video WHERE wvid = ?');
+        video_delete.run(bv)
+        console.log(bv,'delete')
+        return
+    }
 
     let subtitle_json = null
 
@@ -269,7 +315,7 @@ async function get_videos_info(){
     let pos = 0
 
     while( pos < total ){
-        let video_select = db.prepare("SELECT vid,wvid,video_name FROM video WHERE vid > ? LIMIT 100")
+        let video_select = db.prepare("SELECT vid,wvid,video_name FROM video WHERE vid > ? AND video_name is null AND part = 1 ORDER BY vid ASC LIMIT 100")
         let video_list = video_select.all(pos)
 
         for(let i in video_list){
