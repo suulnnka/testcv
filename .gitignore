@@ -2,4 +2,7 @@ test.mp4
 test.srt
 node_modules/
 tmp/*.bmp
-video/
+annie
+videos/*.mp4
+videos/*.m4a
+videos/*.download
