@@ -6,3 +6,6 @@ annie
 videos/*.mp4
 videos/*.m4a
 videos/*.download
+videos/.*
+*.log
+

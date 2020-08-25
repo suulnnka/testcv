@@ -2,6 +2,8 @@ const Database = require('better-sqlite3');
 const child_process = require('child_process');
 const db = new Database('video.db');
 
+let sleep = time=>new Promise(res=>setTimeout(res,time))
+
 async function download_video(wvid,vid,part){
     console.log(wvid)
     await new Promise(function(res,rej){
@@ -17,6 +19,7 @@ async function download_video(wvid,vid,part){
             return res()
         })
     });
+    await sleep(30 * 1000)
 }
 
 async function download_user_video(uid){
