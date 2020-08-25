@@ -29,7 +29,6 @@ async function download_user_video(uid){
         let part = i.part
         
         await download_video(wvid,vid,part)
-        break
     }
 }
 
@@ -40,7 +39,6 @@ async function download_all_video(){
     for( let i of users ){
         let uid = i.uid
         await download_user_video(uid)
-        break
     }
 }
 
