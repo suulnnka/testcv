@@ -19,7 +19,7 @@ async function download_video(wvid,vid,part){
             return resolve()
         })
     });
-    await sleep(30 * 1000)
+    await sleep(60 * 1000)
 }
 
 async function download_user_video(uid){
