@@ -9,6 +9,7 @@ async function download_video(wvid,vid,part){
     await new Promise(function(resolve,reject){
         child_process.exec('./annie -f 16 -o videos/ -O '+vid+' https://www.bilibili.com/video/'+wvid+'?p='+part, function(error, stdout, stderr){
             if(error){
+		console.log(error)
                 console.log(wvid,'error.')
                 return resolve()
             }
